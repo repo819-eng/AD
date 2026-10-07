@@ -1,33 +1,17 @@
-Problemàtiques de la serialització i dels fitxers binaris
+Problematicas de los ficheros binarios y la serializacion
 
-L'enunciat demana investigar quins problemes pot donar fer servir ObjectOutputStream i fitxers binaris. Aquí van els que he trobat:
+1. si cambias la clase Videojoc despues de guardar datos (por ejemplo añadir un atributo o cambiar un tipo) el fichero antiguo puede dejar de funcionar y salta una InvalidClassException. por eso se pone el serialVersionUID, porque si no java calcula uno y con cualquier cambio ya no coincide
 
-1. Canvis a la classe (versions)
-Si guardo videojocs i després canvio la classe Videojoc (afegeixo un atribut, canvio un tipus...), el fitxer antic pot deixar de llegir-se i salta una InvalidClassException.
-Per això es posa serialVersionUID: si no el poses, Java en calcula un segons com és la classe, i qualsevol canvi el fa diferent. Posant-lo a mà (1L) els canvis petits (afegir un camp) es poden aguantar, però canvis grans (canviar el tipus d'un atribut, o el nom/paquet de la classe) igualment trenquen el fitxer.
+2. es inseguro hacer readObject de ficheros que no sabes de donde vienen porque java crea los objetos que hay dentro y se puede llegar a ejecutar codigo que no quieres
 
-2. Seguretat
-Deserialitzar (readObject()) un fitxer que no saps d'on ve és perillós. Java crea els objectes que hi ha dins i pot executar codi de classes que tinguis al classpath ("gadgets"). Hi ha hagut vulnerabilitats molt greus per això. Regla: no fer readObject() de fitxers o dades d'origen desconegut. Des de Java 9 hi ha ObjectInputFilter per limitar quines classes es poden llegir.
+3. no se puede leer con un editor de texto como el bloc de notas, salen simbolos raros. y solo lo puede leer java, si quieres abrir el fichero con python o php no funciona
 
-3. No és llegible ni interoperable
-- No es pot obrir amb un editor de text per veure o arreglar dades.
-- Només el pot llegir Java (i amb la mateixa classe). Un programa en Python, PHP, etc. no l'entén. Per compartir dades és millor JSON, XML, CSV o una base de dades.
+4. si haces append al fichero con un ObjectOutputStream nuevo cada vez se pone una cabecera nueva en medio y despues al leer da StreamCorruptedException. para evitarlo yo guardo toda la lista entera de golpe
 
-4. Afegir objectes al final del fitxer (capçalera)
-Cada vegada que es crea un ObjectOutputStream escriu una capçalera al principi. Si obres el fitxer en mode "append" (new FileOutputStream(fitxer, true)) i fas un altre ObjectOutputStream, queden dues capçaleres al mig i en llegir salta StreamCorruptedException.
-Solucions: guardar tota la llista de cop (el que faig a la pràctica) o fer una subclasse que sobreescrigui writeStreamHeader().
+5. no hay manera facil de saber cuando se acaba el fichero, available() no sirve bien y se tiene que hacer con EOFException
 
-5. Saber quan s'acaba el fitxer
-readObject() no té un "hi ha més?". available() no és fiable. Si guardes objectes un a un s'ha de llegir en bucle fins que salti EOFException. Guardant l'ArrayList sencer com un sol objecte ens ho estalviem.
+6. todas las clases que guardas tienen que ser Serializable sino da NotSerializableException. si un atributo no lo quieres guardar se pone transient
 
-6. Tots els objectes han de ser Serializable
-Si un atribut és d'una classe que no implementa Serializable, salta NotSerializableException. Els atributs que no volem guardar es marquen amb transient (i en llegir tornen com null o 0). Els atributs static tampoc es guarden.
+7. si el programa peta mientras esta escribiendo el fichero se puede quedar corrupto y pierdes todos los datos
 
-7. Fitxer corrupte = es perd tot
-Si el programa peta a mig escriure (es talla la llum, etc.), el fitxer pot quedar a mitges i ja no es pot llegir res. A més, cada vegada sobreescrivim el fitxer sencer, cosa que amb moltes dades és lenta. Una base de dades gestiona millor això.
-
-8. Rendiment i mida
-La serialització de Java guarda també informació de la classe (nom, camps...), així que no és tan compacta com podria semblar, i és més lenta que altres formats.
-
-Conclusió
-Per a una pràctica petita com aquesta va bé perquè és fàcil, però en una aplicació real és millor fer servir JSON o una base de dades.
+En resumen para una practica pequeña va bien porque es facil pero para una aplicacion de verdad es mejor usar json o una base de datosl és millor fer servir JSON o una base de dades.
