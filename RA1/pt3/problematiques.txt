@@ -1,0 +1,33 @@
+Problemàtiques de la serialització i dels fitxers binaris
+
+L'enunciat demana investigar quins problemes pot donar fer servir ObjectOutputStream i fitxers binaris. Aquí van els que he trobat:
+
+1. Canvis a la classe (versions)
+Si guardo videojocs i després canvio la classe Videojoc (afegeixo un atribut, canvio un tipus...), el fitxer antic pot deixar de llegir-se i salta una InvalidClassException.
+Per això es posa serialVersionUID: si no el poses, Java en calcula un segons com és la classe, i qualsevol canvi el fa diferent. Posant-lo a mà (1L) els canvis petits (afegir un camp) es poden aguantar, però canvis grans (canviar el tipus d'un atribut, o el nom/paquet de la classe) igualment trenquen el fitxer.
+
+2. Seguretat
+Deserialitzar (readObject()) un fitxer que no saps d'on ve és perillós. Java crea els objectes que hi ha dins i pot executar codi de classes que tinguis al classpath ("gadgets"). Hi ha hagut vulnerabilitats molt greus per això. Regla: no fer readObject() de fitxers o dades d'origen desconegut. Des de Java 9 hi ha ObjectInputFilter per limitar quines classes es poden llegir.
+
+3. No és llegible ni interoperable
+- No es pot obrir amb un editor de text per veure o arreglar dades.
+- Només el pot llegir Java (i amb la mateixa classe). Un programa en Python, PHP, etc. no l'entén. Per compartir dades és millor JSON, XML, CSV o una base de dades.
+
+4. Afegir objectes al final del fitxer (capçalera)
+Cada vegada que es crea un ObjectOutputStream escriu una capçalera al principi. Si obres el fitxer en mode "append" (new FileOutputStream(fitxer, true)) i fas un altre ObjectOutputStream, queden dues capçaleres al mig i en llegir salta StreamCorruptedException.
+Solucions: guardar tota la llista de cop (el que faig a la pràctica) o fer una subclasse que sobreescrigui writeStreamHeader().
+
+5. Saber quan s'acaba el fitxer
+readObject() no té un "hi ha més?". available() no és fiable. Si guardes objectes un a un s'ha de llegir en bucle fins que salti EOFException. Guardant l'ArrayList sencer com un sol objecte ens ho estalviem.
+
+6. Tots els objectes han de ser Serializable
+Si un atribut és d'una classe que no implementa Serializable, salta NotSerializableException. Els atributs que no volem guardar es marquen amb transient (i en llegir tornen com null o 0). Els atributs static tampoc es guarden.
+
+7. Fitxer corrupte = es perd tot
+Si el programa peta a mig escriure (es talla la llum, etc.), el fitxer pot quedar a mitges i ja no es pot llegir res. A més, cada vegada sobreescrivim el fitxer sencer, cosa que amb moltes dades és lenta. Una base de dades gestiona millor això.
+
+8. Rendiment i mida
+La serialització de Java guarda també informació de la classe (nom, camps...), així que no és tan compacta com podria semblar, i és més lenta que altres formats.
+
+Conclusió
+Per a una pràctica petita com aquesta va bé perquè és fàcil, però en una aplicació real és millor fer servir JSON o una base de dades.
