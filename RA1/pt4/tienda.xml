@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<tienda>
+    <videojuego id="1">
+        <titulo>The Legend of Zelda</titulo>
+        <genero>Aventura</genero>
+        <plataforma>Switch</plataforma>
+        <precio>59.99</precio>
+    </videojuego>
+    <videojuego id="2">
+        <titulo>Minecraft</titulo>
+        <genero>Sandbox</genero>
+        <plataforma>PC</plataforma>
+        <precio>29.99</precio>
+    </videojuego>
+    <videojuego id="3">
+        <titulo>FIFA 26</titulo>
+        <genero>Deportes</genero>
+        <plataforma>PS5</plataforma>
+        <precio>69.99</precio>
+    </videojuego>
+    <videojuego id="4">
+        <titulo>Elden Ring</titulo>
+        <genero>Rol</genero>
+        <plataforma>PC</plataforma>
+        <precio>49.99</precio>
+    </videojuego>
+    <videojuego id="5">
+        <titulo>Mario Kart 8</titulo>
+        <genero>Carreras</genero>
+        <plataforma>Switch</plataforma>
+        <precio>54.99</precio>
+    </videojuego>
+</tienda>
